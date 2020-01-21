@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block body %}
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+
+
+            {% for field in form %}
+
+                <label for="{{ field.id_for_label }}">{{ field.label }}:</label>
+                {{ field |add_class:"form-control" }}
+
+            {% endfor %}
+
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+
+    </form>
+{% endblock %}

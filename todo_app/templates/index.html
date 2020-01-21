@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% block body %}
+    {% if request.user.is_authenticated %}
+        <div class="test">
+            <a href="{% url 'add' %}" class="btn btn-success">Add File</a>
+        </div>
+    {% endif %}
+    <br>
+    <!-- Portfolio Section -->
+    <section id="portfolio">
+
+        <div class="container-fluid p-0">
+
+
+            <div class="row no-gutters">
+                {% for i in file %}
+                    <div class="col-lg-4 col-sm-6">
+                        <a class="portfolio-box" href="{% url 'detail' i.id %}">
+                            <img class="img-fluid" src="{{ i.img.url }}" alt="">
+
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}
+<!-- Call to Action Section -->

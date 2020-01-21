@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% block body %}
+    <!-- Portfolio Section -->
+    <section id="portfolio">
+        <div class="container-fluid p-0">
+            <div class="row no-gutters">
+
+                <div class="col-lg-4 col-sm-6">
+                    <a class="portfolio-box" href="{% url 'detail' file.id %}">
+                        <img class="img-fluid" src="{{ file.img.url }}" alt="">
+
+                    </a>
+                </div>
+                <div class="test">
+                    {% if file.user == request.user %}
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                            Open modal
+                        </button>
+                    {% endif %}
+                </div>
+
+
+
+            </div>
+
+            <div class="row">
+                {#        <div class="col-sm-4">#}
+                {#            <h3>Socket information</h3>#}
+                {#            <p>Connected users: <b id="count"></b></p>#}
+                {#        </div>#}
+                <div class="col-sm-4">
+                    {% for foo in test %}
+                        {% if foo.access_comment %}
+                            <div class="form-group">
+                                <label for="comment">Comment:</label>
+                                <textarea name="comment" id="comment" cols="10" rows="2"
+                                          class="form-control"></textarea>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+
+                    <ul class="list-group">
+
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Modal Heading</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="text" name="hi">
+                        <br>
+                        <input type="checkbox" name="comment"> comment<br>
+                        <input type="checkbox" name="nocomment"> nocomment<br>
+                        <button type="submit" onclick="myFunction()">gonder</button>
+                    </form>
+                </div>
+
+                <!-- Modal footer -->
+
+
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block socket %}
+    <script type="application/javascript">
+        var comment;
+        if (location.protocol === 'https:') {
+            comment = new WebSocket('wss://' + window.location.host + '/comment/{{ file.id }}');
+        } else {
+            comment = new WebSocket('ws://' + window.location.host + '/comment/{{ file.id }}');
+        }
+
+        comment.onopen = function open() {
+            console.log('Connect to Socket');
+        };
+
+        comment.onmessage = function message(event) {
+            var data = JSON.parse(event.data);
+            console.log("Socket response => ", data);
+
+            if (data.status === "list") {
+                // Commentlere girende yuklenen data
+                if (data.data) {
+                    for (var i = 0; i < data.data.length; i++) {
+                        $(".list-group").append(
+                            "<li id='comments'> <img  style='width: 20px' src='" + data.data[i].profile_url + "' />" + data.data[i].username + " : " + data.data[i].comment + " <button class='sil'>Sil</button> </li>"
+                        )
+                    }
+                }
+
+            }
+
+            if (data.status === "new") {
+                $(".list-group").append(
+                    "<li id='comments'> <img style='width: 20px;' src='" + data.data.profile_url + "' />" + data.data.username + " : " + data.data.comment + " <button>Sil</button> </li>"
+                )
+            }
+
+        };
+
+        if (comment.readyState === WebSocket.OPEN) {
+            comment.onopen();
+        }
+
+        $("#comment").keypress(function (e) {
+            var text = $(this).val();
+            if (e.keyCode === 13) {
+                if (text.trim() !== "") {
+                    e.preventDefault();
+                    $(this).val('');
+                    comment.send(JSON.stringify({
+                        "comment": text
+                    }))
+                }
+
+            }
+        });
+
+
+        $(document).on("click", '.sil', function (e) {
+            $(this).click(function (e) {
+
+
+            })
+            {#console.log('asdasd')#}
+            console.log($(this).attr('li'))
+
+
+        })
+
+
+    </script>
+{% endblock %}
